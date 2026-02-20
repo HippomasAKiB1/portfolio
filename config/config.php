@@ -1,32 +1,30 @@
 <?php
 /**
- * Configuration File
- * Contains all constant configurations for the application
+ * config.php
+ * Global constants for the portfolio application.
+ * Update these values with your real information.
  */
 
-// Site Configuration
-define('SITE_NAME', 'AKIB Portfolio');
-define('SITE_DESCRIPTION', 'Creative Developer & Designer');
-define('SITE_AUTHOR', 'AKIB');
+// ── Site identity ─────────────────────────────────────────────────────────────
+define('SITE_NAME',        'AKIB');
+define('SITE_DESCRIPTION', 'Full Stack Developer & Creative Technologist');
+define('SITE_AUTHOR',      'AKIB');
 
-// Portfolio Information
-define('PORTFOLIO_EMAIL', 'akib@example.com');
-define('PORTFOLIO_PHONE', '+1 (234) 567-890');
-define('PORTFOLIO_LOCATION', 'San Francisco, CA, USA');
+// ── Contact details ───────────────────────────────────────────────────────────
+define('PORTFOLIO_EMAIL',    'akib@example.com');
+define('PORTFOLIO_PHONE',    '+880 1234-567890');
+define('PORTFOLIO_LOCATION', 'Dhaka, Bangladesh');
 
-// Social Links
-define('SOCIAL_GITHUB', '#');
-define('SOCIAL_LINKEDIN', '#');
-define('SOCIAL_TWITTER', '#');
-define('SOCIAL_CODEPEN', '#');
+// ── Social media URLs  (replace # with real URLs) ─────────────────────────────
+define('SOCIAL_GITHUB',   'https://github.com/');
+define('SOCIAL_LINKEDIN', 'https://linkedin.com/in/');
+define('SOCIAL_TWITTER',  'https://twitter.com/');
+define('SOCIAL_CODEPEN',  'https://codepen.io/');
 
-// Base paths
-define('BASE_URL', 'http://' . $_SERVER['HTTP_HOST'] . '/emni/');
+// ── Base URL (auto-detected, works on any host / subdirectory) ────────────────
+$protocol  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+$host      = $_SERVER['HTTP_HOST'];
+$scriptDir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/') . '/';
+
+define('BASE_URL',  $protocol . $host . $scriptDir);
 define('ASSET_URL', BASE_URL . 'assets/');
-
-// Theme colors
-define('PRIMARY_COLOR', '#00d4ff');
-define('SECONDARY_COLOR', '#ff006e');
-define('ACCENT_COLOR', '#8338ec');
-define('BG_DARK', '#0a0e27');
-define('BG_LIGHT', '#ffffff');

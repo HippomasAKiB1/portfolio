@@ -1,61 +1,57 @@
 <?php
 /**
- * Portfolio Controller
- * Handles business logic and passes data to views
+ * portfolio_controller.php
+ * Wires the model data together and renders views.
  */
 
-// Include model
 require_once __DIR__ . '/../models/portfolio_model.php';
 
-// Get page data
-function get_page_data() {
-    $data = array(
-        'hero' => get_hero_data(),
-        'about' => get_about_data(),
-        'education' => get_education_data(),
-        'skills' => get_skills_data(),
-        'projects' => get_projects_data(),
-        'testimonials' => get_testimonials_data(),
-        'contact' => get_contact_data(),
-        'navigation' => get_navigation_items(),
-        'social_links' => get_social_links()
-    );
-    
-    return $data;
+// ── Asset URL helpers ─────────────────────────────────────────────────────────
+// These return the full URL to a file inside assets/css/ or assets/js/
+function asset_css($filename) {
+    return ASSET_URL . 'css/' . $filename;
 }
 
-// Render a view file
-function render_view($view_name, $data = array()) {
+function asset_js($filename) {
+    return ASSET_URL . 'js/' . $filename;
+}
+
+// ── View renderer ─────────────────────────────────────────────────────────────
+// $view_name is relative to the views/ directory, e.g. 'sections/hero'
+function render_view($view_name, $data = []) {
     $view_file = __DIR__ . '/../views/' . $view_name . '.php';
-    
-    if (file_exists($view_file)) {
-        // Extract array data into variables
-        extract($data);
-        
-        // Include the view
-        include $view_file;
-    } else {
-        die("View file not found: " . $view_name);
+
+    if (!file_exists($view_file)) {
+        die('View not found: ' . htmlspecialchars($view_name));
     }
+
+    // Make every key in $data available as a variable inside the view
+    extract($data);
+    include $view_file;
 }
 
-// Format skill proficiency for progress bars
-function format_skill_proficiency($proficiency) {
-    return min(max($proficiency, 0), 100);
+// ── Helper: clamp skill proficiency 0–100 ────────────────────────────────────
+function clamp_proficiency($value) {
+    return min(max((int) $value, 0), 100);
 }
 
-// Get CSS asset URL
-function asset($path) {
-    return ASSET_URL . 'css/' . $path;
+// ── Collect all page data from the model ─────────────────────────────────────
+function get_page_data() {
+    return [
+        'hero'         => get_hero_data(),
+        'about'        => get_about_data(),
+        'education'    => get_education_data(),
+        'skills'       => get_skills_data(),
+        'projects'     => get_projects_data(),
+        'testimonials' => get_testimonials_data(),
+        'contact'      => get_contact_data(),
+        'navigation'   => get_navigation_items(),
+        'social_links' => get_social_links(),
+    ];
 }
 
-// Get JS asset URL
-function asset_js($path) {
-    return ASSET_URL . 'js/' . $path;
-}
-
-// Render entire portfolio page
+// ── Main entry point ──────────────────────────────────────────────────────────
 function render_portfolio() {
-    $page_data = get_page_data();
-    render_view('layout', $page_data);
+    $data = get_page_data();
+    render_view('layout', $data);
 }

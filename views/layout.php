@@ -1,7 +1,7 @@
 <?php
 /**
- * Main Layout View
- * Contains the HTML structure and includes all sections
+ * layout.php — Main HTML shell
+ * Includes all sections in order and links assets.
  */
 ?>
 <!DOCTYPE html>
@@ -9,9 +9,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo SITE_NAME; ?> - <?php echo SITE_DESCRIPTION; ?></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo asset('styles.css'); ?>">
+    <meta name="description" content="<?php echo SITE_AUTHOR; ?> — <?php echo SITE_DESCRIPTION; ?>">
+    <title><?php echo SITE_NAME; ?> | <?php echo SITE_DESCRIPTION; ?></title>
+
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="<?php echo asset_css('styles.css'); ?>">
 </head>
 <body class="dark-mode">
 
@@ -21,45 +31,48 @@
     <!-- SCROLL PROGRESS BAR -->
     <div class="scroll-progress" id="scrollProgress"></div>
 
-    <!-- INTRO PAGE -->
+    <!-- INTRO / SPLASH PAGE -->
     <?php render_view('sections/intro', $data); ?>
 
-    <!-- MAIN WEBSITE -->
-    <main>
-        <!-- HEADER -->
+    <!-- MAIN WEBSITE (hidden until user clicks Explore) -->
+    <main id="main-content">
+
+        <!-- HEADER & NAV -->
         <?php render_view('sections/header', $data); ?>
 
-        <!-- HERO SECTION -->
+        <!-- HERO -->
         <?php render_view('sections/hero', $data); ?>
 
-        <!-- ABOUT SECTION -->
+        <!-- ABOUT -->
         <?php render_view('sections/about', $data); ?>
 
-        <!-- EDUCATION SECTION -->
+        <!-- EDUCATION -->
         <?php render_view('sections/education', $data); ?>
 
-        <!-- SKILLS SECTION -->
+        <!-- SKILLS -->
         <?php render_view('sections/skills', $data); ?>
 
-        <!-- PROJECTS SECTION -->
+        <!-- PROJECTS -->
         <?php render_view('sections/projects', $data); ?>
 
-        <!-- RECOMMENDATIONS SECTION -->
+        <!-- TESTIMONIALS / RECOMMENDATIONS -->
         <?php render_view('sections/recommendations', $data); ?>
 
-        <!-- CONTACT SECTION -->
+        <!-- CONTACT -->
         <?php render_view('sections/contact', $data); ?>
 
         <!-- FOOTER -->
         <?php render_view('sections/footer', $data); ?>
+
     </main>
 
-    <!-- SCROLL TO TOP BUTTON -->
-    <button class="scroll-to-top" id="scrollToTop" onclick="scrollToTop()">
+    <!-- SCROLL-TO-TOP BUTTON -->
+    <button class="scroll-to-top" id="scrollToTop" aria-label="Scroll to top">
         <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- Scripts -->
+    <!-- Main JavaScript -->
     <script src="<?php echo asset_js('script.js'); ?>"></script>
+
 </body>
 </html>
