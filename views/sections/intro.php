@@ -10,7 +10,7 @@
         <h1 class="intro-title">
             <span class="intro-name"><?php echo htmlspecialchars(SITE_NAME); ?></span>
         </h1>
-        <p class="intro-subtitle">Problem Solver &amp; Digital Architect</p>
+        <p class="intro-subtitle">ML Engineer</p>
         <button id="enter-btn" aria-label="Enter portfolio">
             <span class="enter-bracket">[</span>
             <span class="enter-text">ENTER</span>

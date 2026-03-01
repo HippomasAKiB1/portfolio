@@ -26,7 +26,7 @@ $categories = array_unique(array_column($projects, 'category'));
         <!-- Project grid -->
         <div class="projects-grid" id="projects-grid">
             <?php foreach ($projects as $project): ?>
-                <article class="project-card reveal-card"
+                <article class="project-card reveal-card in-view"
                          data-id="<?php echo htmlspecialchars($project['id']); ?>"
                          data-category="<?php echo htmlspecialchars($project['category']); ?>">
 

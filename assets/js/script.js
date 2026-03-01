@@ -93,12 +93,13 @@ function runBootSequence() {
         setTimeout(() => {
             strips.forEach(s => { s.style.opacity = '1'; });
             setTimeout(() => {
-                screen.style.transition = 'opacity 0.4s ease';
+                screen.style.transition = 'opacity 0.6s ease, filter 0.6s ease';
                 screen.style.opacity = '0';
+                screen.style.filter = 'blur(4px)';
                 setTimeout(() => {
                     screen.style.display = 'none';
                     revealIntro();
-                }, 420);
+                }, 620);
             }, 120);
         }, 300);
     }
@@ -238,15 +239,17 @@ function revealMain() {
 function initLenis() {
     if (typeof Lenis === 'undefined') return;
     const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
-    function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
-    requestAnimationFrame(raf);
 
-    // Feed Lenis into GSAP ScrollTrigger
+    // Use GSAP ticker exclusively to drive Lenis (avoids double-stepping per frame)
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         gsap.registerPlugin(ScrollTrigger);
         lenis.on('scroll', ScrollTrigger.update);
         gsap.ticker.add(time => lenis.raf(time * 1000));
         gsap.ticker.lagSmoothing(0);
+    } else {
+        // Fallback: standalone rAF loop only when GSAP is not available
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
     }
 
     // Smooth-scroll for anchor links
@@ -401,7 +404,7 @@ function initScrollAnimations() {
         return;
     }
 
-    gsap.registerPlugin(ScrollTrigger);
+    // ScrollTrigger already registered in initLenis(); no need to re-register
 
     // Section titles / heads
     document.querySelectorAll('.section-head').forEach(el => {
@@ -412,8 +415,8 @@ function initScrollAnimations() {
         });
     });
 
-    // Project cards stagger
-    const cards = document.querySelectorAll('.project-card');
+    // Project cards stagger: only animate those not already marked in-view
+    const cards = document.querySelectorAll('.project-card:not(.in-view)');
     if (cards.length) {
         gsap.from(cards, {
             opacity: 0, y: 50, stagger: 0.1,
@@ -478,11 +481,34 @@ function initSkillTree() {
     const skills = window.SKILLS_DATA || [];
     const wrap = document.getElementById('skill-tree-wrap');
 
-    // Canvas size
     const DPR = Math.min(window.devicePixelRatio, 2);
+
+    const CLUSTER_COLORS = {
+        'DATA': '#00d4ff',
+        'CODE': '#9b59b6',
+        'ML/AI': '#00ff88',
+        'TOOLS': '#f39c12',
+        'ESPORTS': '#e74c3c',
+    };
+    const CLUSTER_BG = {
+        'DATA': 'rgba(0,212,255,0.06)',
+        'CODE': 'rgba(155,89,182,0.06)',
+        'ML/AI': 'rgba(0,255,136,0.06)',
+        'TOOLS': 'rgba(243,156,18,0.06)',
+        'ESPORTS': 'rgba(231,76,60,0.06)',
+    };
+
+    let nodes = [];
+    let animProgress = 0;
+    let hoveredNode = null;
+    let activeCluster = null;
+    let animId;
+    let pulseT = 0; // for animated pulse rings
+    let rafPulse;
+
     function resize() {
         const w = wrap.offsetWidth;
-        const h = Math.max(Math.round(w * 0.55), 400);
+        const h = Math.max(Math.round(w * 0.62), 440);
         canvas.width = w * DPR;
         canvas.height = h * DPR;
         canvas.style.width = w + 'px';
@@ -491,23 +517,7 @@ function initSkillTree() {
         layoutNodes(w, h);
     }
 
-    // Cluster colors
-    const CLUSTER_COLORS = {
-        'DATA': '#00d4ff',
-        'CODE': '#9b59b6',
-        'ML/AI': '#00ff88',
-        'TOOLS': '#f39c12',
-        'ESPORTS': '#e74c3c',
-    };
-
-    let nodes = [];
-    let animProgress = 0; // 0 → 1 animated on scroll
-    let hoveredNode = null;
-    let activeCluster = null;
-    let animId;
-
     function layoutNodes(W, H) {
-        // Group by cluster
         const clusters = {};
         skills.forEach(s => {
             if (!clusters[s.cluster]) clusters[s.cluster] = [];
@@ -523,28 +533,113 @@ function initSkillTree() {
             const cx = colW * ci + colW / 2;
             cSkills.forEach((s, si) => {
                 const totalInCol = cSkills.length;
-                const cy = H * 0.15 + (H * 0.7) * ((si + 1) / (totalInCol + 1));
+                // Base radius 26, scale slightly with proficiency
+                const baseR = 26 + Math.round((s.proficiency - 60) / 40 * 8);
+                const cy = H * 0.18 + (H * 0.68) * ((si + 1) / (totalInCol + 1));
                 nodes.push({
                     ...s,
                     x: cx, y: cy,
-                    r: 28,
+                    r: baseR,
                     color: CLUSTER_COLORS[cluster] || '#00d4ff',
+                    bgColor: CLUSTER_BG[cluster] || 'rgba(0,212,255,0.06)',
                     label: s.name,
-                    wired: false,
+                    cluster,
                 });
             });
         });
-
         draw();
     }
 
-    function draw() {
-        const W = canvas.offsetWidth, H = canvas.offsetHeight;
-        ctx.clearRect(0, 0, W, H);
+    function drawHexGrid(W, H) {
+        const size = 22;
+        const cols = Math.ceil(W / (size * 1.73)) + 2;
+        const rows = Math.ceil(H / (size * 1.5)) + 2;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0,212,255,0.035)';
+        ctx.lineWidth = 0.5;
+        for (let row = -1; row < rows; row++) {
+            for (let col = -1; col < cols; col++) {
+                const x = col * size * 1.73 + (row % 2 === 0 ? 0 : size * 0.865);
+                const y = row * size * 1.5;
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const angle = (Math.PI / 3) * i - Math.PI / 6;
+                    const px = x + size * Math.cos(angle);
+                    const py = y + size * Math.sin(angle);
+                    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+        }
+        ctx.restore();
+    }
 
-        const progressCap = animProgress;
+    function drawColumnBg(W, H) {
+        const clusterKeys = [...new Set(nodes.map(n => n.cluster))];
+        const colW = W / clusterKeys.length;
+        clusterKeys.forEach((cluster, i) => {
+            const dim = activeCluster && activeCluster !== cluster;
+            ctx.save();
+            ctx.globalAlpha = dim ? 0.02 : 0.07;
+            ctx.fillStyle = CLUSTER_COLORS[cluster] || '#00d4ff';
+            ctx.fillRect(i * colW + 4, 0, colW - 8, H);
+            ctx.restore();
+        });
+    }
 
-        // Draw wires (connections within cluster)
+    function drawColumnHeaders(W, H) {
+        const clusterKeys = [...new Set(nodes.map(n => n.cluster))];
+        const colW = W / clusterKeys.length;
+        clusterKeys.forEach((cluster, i) => {
+            const cx = colW * i + colW / 2;
+            const dim = activeCluster && activeCluster !== cluster;
+            const color = CLUSTER_COLORS[cluster] || '#00d4ff';
+
+            ctx.save();
+            ctx.globalAlpha = dim ? 0.15 : 1;
+
+            // Accent underline bar
+            const barW = Math.min(colW * 0.6, 90);
+            const barX = cx - barW / 2;
+            const barY = 36;
+            const grad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+            grad.addColorStop(0, 'transparent');
+            grad.addColorStop(0.5, color);
+            grad.addColorStop(1, 'transparent');
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(barX, barY);
+            ctx.lineTo(barX + barW, barY);
+            ctx.stroke();
+
+            // Cluster label
+            ctx.font = '700 11px "JetBrains Mono", monospace';
+            ctx.fillStyle = color;
+            ctx.textAlign = 'center';
+            ctx.shadowColor = color;
+            ctx.shadowBlur = dim ? 0 : 8;
+            ctx.fillText(cluster, cx, 26);
+
+            ctx.restore();
+        });
+    }
+
+    function drawScanLine(W, H) {
+        if (animProgress < 1) return;
+        const y = ((Date.now() / 18) % H);
+        ctx.save();
+        const grad = ctx.createLinearGradient(0, y - 40, 0, y + 40);
+        grad.addColorStop(0, 'transparent');
+        grad.addColorStop(0.5, 'rgba(0,212,255,0.04)');
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, y - 40, W, 80);
+        ctx.restore();
+    }
+
+    function drawWires() {
         const clusterMap = {};
         nodes.forEach(n => {
             if (!clusterMap[n.cluster]) clusterMap[n.cluster] = [];
@@ -554,84 +649,173 @@ function initSkillTree() {
         Object.values(clusterMap).forEach(clusterNodes => {
             for (let i = 0; i < clusterNodes.length - 1; i++) {
                 const a = clusterNodes[i], b = clusterNodes[i + 1];
-                const nodeProgress = Math.min(progressCap * clusterNodes.length * 1.2 - i, 1);
-                if (nodeProgress <= 0) continue;
+                const np = Math.min(animProgress * clusterNodes.length * 1.4 - i, 1);
+                if (np <= 0) continue;
+                const dim = activeCluster && activeCluster !== a.cluster;
 
-                const dim = (!activeCluster || activeCluster === a.cluster);
                 ctx.save();
-                ctx.globalAlpha = dim ? 0.35 * nodeProgress : 0.08 * nodeProgress;
+                ctx.globalAlpha = (dim ? 0.05 : 0.3) * np;
                 ctx.strokeStyle = a.color;
-                ctx.lineWidth = 1;
-                ctx.setLineDash([4, 6]);
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([5, 7]);
+                ctx.shadowColor = a.color;
+                ctx.shadowBlur = dim ? 0 : 4;
                 ctx.beginPath();
                 ctx.moveTo(a.x, a.y);
-                // Animate line draw
-                const ex = a.x + (b.x - a.x) * nodeProgress;
-                const ey = a.y + (b.y - a.y) * nodeProgress;
+                const ex = a.x + (b.x - a.x) * np;
+                const ey = a.y + (b.y - a.y) * np;
                 ctx.lineTo(ex, ey);
                 ctx.stroke();
+                ctx.setLineDash([]);
                 ctx.restore();
             }
         });
+    }
 
-        // Draw nodes
-        nodes.forEach((n, idx) => {
-            const nodeProgress = Math.min(progressCap * nodes.length * 1.2 - idx, 1);
-            if (nodeProgress <= 0) return;
+    function drawNode(n, idx) {
+        const np = Math.min(animProgress * nodes.length * 1.3 - idx, 1);
+        if (np <= 0) return;
 
-            const dimmed = activeCluster && activeCluster !== n.cluster;
-            const isHov = hoveredNode === n;
+        const dimmed = activeCluster && activeCluster !== n.cluster;
+        const isHov = hoveredNode === n;
+        const r = isHov ? n.r * 1.18 : n.r;
 
+        ctx.save();
+        ctx.globalAlpha = dimmed ? 0.18 : np;
+
+        // Shadow glow (reliable cross-browser approach)
+        if (!dimmed) {
+            ctx.shadowColor = n.color;
+            ctx.shadowBlur = isHov ? 30 : 14;
+        }
+
+        // Node fill — use rgba directly (colors are hex so we parse)
+        function hexAlpha(hex, a) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r},${g},${b},${a})`;
+        }
+        const fillGrad = ctx.createRadialGradient(n.x - r * 0.3, n.y - r * 0.3, 0, n.x, n.y, r);
+        if (isHov) {
+            fillGrad.addColorStop(0, hexAlpha(n.color, 0.8));
+            fillGrad.addColorStop(1, hexAlpha(n.color, 0.3));
+        } else {
+            fillGrad.addColorStop(0, 'rgba(20,20,40,0.96)');
+            fillGrad.addColorStop(1, 'rgba(8,8,20,0.98)');
+        }
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, r * np, 0, Math.PI * 2);
+        ctx.fillStyle = fillGrad;
+        ctx.fill();
+
+        // Border
+        ctx.strokeStyle = n.color;
+        ctx.lineWidth = isHov ? 2.5 : 1.5;
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+
+
+        // Proficiency arc (outer ring)
+        if (!dimmed && np > 0.6) {
+            const arcAlpha = (np - 0.6) / 0.4;
+            const arcR = r + 6;
+            const startAngle = -Math.PI / 2;
+            const endAngle = startAngle + (Math.PI * 2) * (n.proficiency / 100) * Math.min(animProgress * 2, 1);
             ctx.save();
-            ctx.globalAlpha = dimmed ? 0.2 : 1;
-
-            // Glow
-            if (!dimmed) {
-                ctx.shadowColor = n.color;
-                ctx.shadowBlur = isHov ? 24 : 10;
-            }
-
-            // Node circle
-            const r = isHov ? n.r * 1.2 : n.r;
-            ctx.beginPath();
-            ctx.arc(n.x, n.y, r * nodeProgress, 0, Math.PI * 2);
-            ctx.fillStyle = isHov ? n.color : 'rgba(8, 8, 16, 0.9)';
-            ctx.fill();
+            ctx.globalAlpha = arcAlpha * (isHov ? 0.9 : 0.55);
             ctx.strokeStyle = n.color;
-            ctx.lineWidth = isHov ? 2 : 1.5;
+            ctx.lineWidth = isHov ? 3 : 2;
+            ctx.lineCap = 'round';
+            ctx.shadowColor = n.color;
+            ctx.shadowBlur = isHov ? 12 : 6;
+            // Track (dim)
+            ctx.globalAlpha *= 0.15;
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, arcR, 0, Math.PI * 2);
             ctx.stroke();
+            // Fill arc
+            ctx.globalAlpha = arcAlpha * (isHov ? 0.9 : 0.55);
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, arcR, startAngle, endAngle);
+            ctx.stroke();
+            ctx.restore();
+        }
 
-            // Label
-            if (nodeProgress > 0.8) {
-                ctx.shadowBlur = 0;
-                ctx.font = `${isHov ? 600 : 500} ${isHov ? 11 : 10}px 'JetBrains Mono', monospace`;
-                ctx.fillStyle = isHov ? '#080810' : n.color;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
+        // Animated pulse ring (for top-proficiency nodes)
+        if (!dimmed && n.proficiency >= 85 && animProgress >= 1) {
+            const pulseR = r + 10 + Math.sin(pulseT * 0.04 + idx) * 6;
+            const pulseAlpha = (0.4 + Math.sin(pulseT * 0.04 + idx) * 0.2) * (isHov ? 1 : 0.5);
+            ctx.save();
+            ctx.globalAlpha = dimmed ? 0 : pulseAlpha;
+            ctx.strokeStyle = n.color;
+            ctx.lineWidth = 1;
+            ctx.shadowColor = n.color;
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, pulseR, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // Label inside node
+        if (np > 0.75) {
+            const labelAlpha = (np - 0.75) / 0.25;
+            ctx.save();
+            ctx.globalAlpha = labelAlpha * (dimmed ? 0.2 : 1);
+            ctx.shadowColor = isHov ? 'rgba(0,0,0,0.8)' : n.color;
+            ctx.shadowBlur = isHov ? 0 : 4;
+
+            // Skill name (split if long)
+            const words = n.label.split('/');
+            const fontSize = Math.max(8, Math.min(10, r * 0.38));
+            ctx.font = `700 ${fontSize}px "JetBrains Mono", monospace`;
+            ctx.fillStyle = isHov ? '#080810' : n.color;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            if (words.length > 1) {
+                ctx.fillText(words[0], n.x, n.y - fontSize * 0.6);
+                ctx.fillText('/' + words[1], n.x, n.y + fontSize * 0.6);
+            } else {
                 ctx.fillText(n.label, n.x, n.y);
             }
 
+            // Proficiency % below node (outside)
+            ctx.shadowBlur = 0;
+            ctx.font = `500 9px "JetBrains Mono", monospace`;
+            ctx.fillStyle = isHov ? n.color : 'rgba(255,255,255,0.35)';
+            ctx.fillText(n.proficiency + '%', n.x, n.y + r + 13);
             ctx.restore();
-        });
+        }
 
-        // Cluster label at top of each column
-        const W2 = canvas.offsetWidth;
-        const clusterKeys = [...new Set(nodes.map(n => n.cluster))];
-        const colW = W2 / clusterKeys.length;
-        clusterKeys.forEach((cluster, i) => {
-            const cx = colW * i + colW / 2;
-            const dim = activeCluster && activeCluster !== cluster;
-            ctx.save();
-            ctx.globalAlpha = dim ? 0.15 : 0.5;
-            ctx.font = '700 10px "JetBrains Mono", monospace';
-            ctx.fillStyle = CLUSTER_COLORS[cluster] || '#00d4ff';
-            ctx.textAlign = 'center';
-            ctx.fillText(cluster, cx, 20);
-            ctx.restore();
-        });
+        ctx.restore();
     }
 
-    // Animate progress on scroll
+    function draw() {
+        const W = canvas.offsetWidth, H = canvas.offsetHeight;
+        ctx.clearRect(0, 0, W, H);
+
+        drawHexGrid(W, H);
+        drawColumnBg(W, H);
+        drawScanLine(W, H);
+        drawColumnHeaders(W, H);
+        drawWires();
+        nodes.forEach((n, i) => drawNode(n, i));
+    }
+
+    // Continuous pulse animation after reveal
+    function startPulse() {
+        cancelAnimationFrame(rafPulse);
+        function pulse() {
+            pulseT++;
+            draw();
+            rafPulse = requestAnimationFrame(pulse);
+        }
+        pulse();
+    }
+
+    // Scroll-triggered entry animation
     const observer = new IntersectionObserver(entries => {
         entries.forEach(e => {
             if (e.isIntersecting) {
@@ -639,37 +823,44 @@ function initSkillTree() {
                 let start = null;
                 function anim(ts) {
                     if (!start) start = ts;
-                    animProgress = Math.min((ts - start) / 1200, 1);
+                    animProgress = Math.min((ts - start) / 1400, 1);
                     draw();
-                    if (animProgress < 1) animId = requestAnimationFrame(anim);
+                    if (animProgress < 1) {
+                        animId = requestAnimationFrame(anim);
+                    } else {
+                        startPulse();
+                    }
                 }
                 animId = requestAnimationFrame(anim);
                 observer.unobserve(canvas);
             }
         });
-    }, { threshold: 0.3 });
+    }, { threshold: 0.25 });
     observer.observe(canvas);
 
-    // Mouse hover on canvas
+    // Mouse hover
     canvas.addEventListener('mousemove', e => {
         const rect = canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left;
         const my = e.clientY - rect.top;
         const prev = hoveredNode;
-        hoveredNode = nodes.find(n => Math.hypot(n.x - mx, n.y - my) < n.r * 1.4) || null;
+        hoveredNode = nodes.find(n => Math.hypot(n.x - mx, n.y - my) < n.r * 1.5) || null;
         if (hoveredNode !== prev) {
-            draw();
+            if (!rafPulse) draw(); // only redraw if pulse not running
             if (hoveredNode && tooltip) {
                 const tn = tooltip.querySelector('.tooltip-name');
                 const tl = tooltip.querySelector('.tooltip-level');
                 const td = tooltip.querySelector('.tooltip-desc');
                 const tf = tooltip.querySelector('.tooltip-fill');
                 if (tn) tn.textContent = hoveredNode.name;
-                if (tl) tl.textContent = '// ' + hoveredNode.level;
+                if (tl) tl.textContent = '// ' + hoveredNode.level + ' · ' + hoveredNode.proficiency + '%';
                 if (td) td.textContent = hoveredNode.desc;
                 if (tf) tf.style.width = hoveredNode.proficiency + '%';
-                tooltip.style.left = (hoveredNode.x + 36) + 'px';
-                tooltip.style.top = (hoveredNode.y - 20) + 'px';
+                // Smart positioning — keep within canvas
+                const W = canvas.offsetWidth;
+                const tipX = hoveredNode.x + hoveredNode.r + 14;
+                tooltip.style.left = (tipX + 200 > W ? hoveredNode.x - hoveredNode.r - 214 : tipX) + 'px';
+                tooltip.style.top = Math.max(0, hoveredNode.y - 30) + 'px';
                 tooltip.classList.add('visible');
             } else if (tooltip) {
                 tooltip.classList.remove('visible');
@@ -680,7 +871,6 @@ function initSkillTree() {
     canvas.addEventListener('mouseleave', () => {
         hoveredNode = null;
         if (tooltip) tooltip.classList.remove('visible');
-        draw();
     });
 
     // Cluster filter buttons
@@ -694,13 +884,19 @@ function initSkillTree() {
                 activeCluster = cluster;
                 btn.classList.add('active');
             }
-            draw();
         });
     });
 
     resize();
-    window.addEventListener('resize', () => { resize(); });
+    window.addEventListener('resize', () => {
+        cancelAnimationFrame(rafPulse);
+        rafPulse = null;
+        resize();
+    });
 }
+
+
+
 
 /* ════════════════════════════════════════════════════════════════════════════
    12. PROJECT FILTER
@@ -710,23 +906,39 @@ function initProjectFilter() {
     const cards = document.querySelectorAll('.project-card');
     if (!btns.length || !cards.length) return;
 
+    // helper that actually shows/hides cards according to filter
+    function applyFilter(filter, animate = true) {
+        cards.forEach(card => {
+            const match = filter === 'ALL' || card.dataset.category === filter;
+            if (match) {
+                card.classList.remove('hidden');
+                // make sure reveal animation won't keep it invisible
+                card.classList.add('in-view');
+                if (animate && typeof gsap !== 'undefined') {
+                    gsap.fromTo(card, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' });
+                } else {
+                    card.style.opacity = 1;
+                    card.style.transform = '';
+                }
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+    }
+
     btns.forEach(btn => {
         btn.addEventListener('click', () => {
             btns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            const filter = btn.dataset.filter;
-
-            cards.forEach(card => {
-                const match = filter === 'ALL' || card.dataset.category === filter;
-                if (match) {
-                    card.classList.remove('hidden');
-                    gsap && gsap.fromTo(card, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' });
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
+            applyFilter(btn.dataset.filter);
         });
     });
+
+    // apply whichever filter is already marked active (usually "ALL")
+    const initial = document.querySelector('.filter-btn.active');
+    if (initial) {
+        applyFilter(initial.dataset.filter, false);
+    }
 }
 
 /* ════════════════════════════════════════════════════════════════════════════

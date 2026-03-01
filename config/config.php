@@ -11,15 +11,15 @@ define('SITE_DESCRIPTION', 'Full Stack Developer & Creative Technologist');
 define('SITE_AUTHOR',      'AKIB');
 
 // ── Contact details ───────────────────────────────────────────────────────────
-define('PORTFOLIO_EMAIL',    'akib@example.com');
+define('PORTFOLIO_EMAIL',    'mail@akibhasan.me');
 define('PORTFOLIO_PHONE',    '+880 1234-567890');
 define('PORTFOLIO_LOCATION', 'Dhaka, Bangladesh');
 
 // ── Social media URLs  (replace # with real URLs) ─────────────────────────────
+define('SOCIAL_DISCORD',  'https://github.com/HippomasAKiB1');
+define('SOCIAL_LINKEDIN', 'https://www.linkedin.com/in/akib-hasan-pyil/');
+define('SOCIAL_FACEBOOK', 'https://www.facebook.com/HippomasAKiB');
 define('SOCIAL_GITHUB',   'https://github.com/');
-define('SOCIAL_LINKEDIN', 'https://linkedin.com/in/');
-define('SOCIAL_TWITTER',  'https://twitter.com/');
-define('SOCIAL_CODEPEN',  'https://codepen.io/');
 
 // ── Base URL (auto-detected, works on any host / subdirectory) ────────────────
 $protocol  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';

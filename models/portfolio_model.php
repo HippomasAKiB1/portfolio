@@ -32,27 +32,11 @@ function get_education_data() {
     return [
         [
             'code'        => 'EDU-001',
-            'title'       => 'Bachelor of Science in Computer Science',
-            'institution' => 'University of Technology',
-            'year'        => '2018 – 2022',
-            'description' => 'Advanced studies in Web Development, Machine Learning, Software Engineering, and Algorithms.',
-            'tags'        => ['CS Core', 'ML', 'Software Engineering'],
-        ],
-        [
-            'code'        => 'EDU-002',
-            'title'       => 'Certified Full Stack Developer',
-            'institution' => 'Professional Certification Program',
-            'year'        => '2022 – 2023',
-            'description' => 'Intensive training covering React, Node.js, MongoDB, REST APIs, and modern web development practices.',
-            'tags'        => ['React', 'Node.js', 'MongoDB'],
-        ],
-        [
-            'code'        => 'EDU-003',
-            'title'       => 'Advanced Web Design & UX',
-            'institution' => 'Design Institute',
-            'year'        => '2023 – Present',
-            'description' => 'Specialized training in UI/UX design, micro-animations, accessibility, and interactive web experiences.',
-            'tags'        => ['UI/UX', 'Animation', 'Design Systems'],
+            'title'       => 'Bachelor of Science in Computer Science & Engineering',
+            'institution' => 'American International University Bangladesh (AIUB)',
+            'year'        => '2022 – Present',
+            'description' => 'Core CS curriculum with majors in Machine Learning, Data Science, Human Computer Interaction, Computer Vision & Pattern Recognition, and Natural Language Processing.',
+            'tags'        => ['Core CS', 'Machine Learning', 'Data Science', 'HCI', 'Computer Vision', 'NLP'],
         ],
     ];
 }
@@ -61,26 +45,34 @@ function get_education_data() {
 function get_skills_data() {
     return [
         // DATA cluster
-        ['name' => 'Python',      'cluster' => 'DATA',    'proficiency' => 90, 'level' => 'Expert',    'desc' => 'Data pipelines, analysis & ML scripts'],
-        ['name' => 'Pandas',      'cluster' => 'DATA',    'proficiency' => 87, 'level' => 'Advanced',  'desc' => 'DataFrame manipulation & EDA'],
-        ['name' => 'SQL',         'cluster' => 'DATA',    'proficiency' => 85, 'level' => 'Advanced',  'desc' => 'Complex queries, optimization & design'],
-        ['name' => 'D3.js',       'cluster' => 'DATA',    'proficiency' => 72, 'level' => 'Proficient','desc' => 'Interactive data visualizations'],
+        ['name' => 'Python',        'cluster' => 'DATA',    'proficiency' => 93, 'level' => 'Expert',    'desc' => 'Data pipelines, EDA, scripting & ML workflows'],
+        ['name' => 'SQL',           'cluster' => 'DATA',    'proficiency' => 88, 'level' => 'Advanced',  'desc' => 'Complex queries, joins, optimization & schema design'],
+        ['name' => 'Pandas',        'cluster' => 'DATA',    'proficiency' => 87, 'level' => 'Advanced',  'desc' => 'DataFrame manipulation, cleaning & analysis'],
+        ['name' => 'Sheets/Excel',  'cluster' => 'DATA',    'proficiency' => 85, 'level' => 'Advanced',  'desc' => 'Pivot tables, dashboards & data reporting'],
+        ['name' => 'D3.js',         'cluster' => 'DATA',    'proficiency' => 72, 'level' => 'Proficient','desc' => 'Interactive & animated data visualizations'],
         // CODE cluster
-        ['name' => 'JavaScript',  'cluster' => 'CODE',    'proficiency' => 92, 'level' => 'Expert',    'desc' => 'ES2024+, async, canvas, DOM, Web APIs'],
-        ['name' => 'PHP',         'cluster' => 'CODE',    'proficiency' => 82, 'level' => 'Advanced',  'desc' => 'MVC backend & procedural scripting'],
-        ['name' => 'React',       'cluster' => 'CODE',    'proficiency' => 88, 'level' => 'Advanced',  'desc' => 'Component-based UI with hooks'],
-        ['name' => 'Node.js',     'cluster' => 'CODE',    'proficiency' => 83, 'level' => 'Advanced',  'desc' => 'Server-side JS & RESTful APIs'],
+        ['name' => 'C++',           'cluster' => 'CODE',    'proficiency' => 80, 'level' => 'Advanced',  'desc' => 'Systems programming, OOP & competitive coding'],
+        ['name' => 'C#',            'cluster' => 'CODE',    'proficiency' => 75, 'level' => 'Proficient','desc' => '.NET development & game scripting with Unity'],
+        ['name' => 'Java',          'cluster' => 'CODE',    'proficiency' => 78, 'level' => 'Proficient','desc' => 'OOP, data structures & backend applications'],
+        ['name' => 'Python',        'cluster' => 'CODE',    'proficiency' => 93, 'level' => 'Expert',    'desc' => 'Scripting, automation & full-stack ML apps'],
+        ['name' => 'PHP',           'cluster' => 'CODE',    'proficiency' => 82, 'level' => 'Advanced',  'desc' => 'MVC backends, REST APIs & server scripting'],
+        ['name' => 'JavaScript',    'cluster' => 'CODE',    'proficiency' => 90, 'level' => 'Expert',    'desc' => 'ES2024+, async, canvas, DOM & Web APIs'],
         // ML/AI cluster
-        ['name' => 'TensorFlow',  'cluster' => 'ML/AI',   'proficiency' => 80, 'level' => 'Advanced',  'desc' => 'Deep learning model training & deployment'],
-        ['name' => 'Scikit-learn','cluster' => 'ML/AI',   'proficiency' => 85, 'level' => 'Advanced',  'desc' => 'Classification, regression & clustering'],
-        ['name' => 'OpenCV',      'cluster' => 'ML/AI',   'proficiency' => 70, 'level' => 'Proficient','desc' => 'Computer vision & image processing'],
+        ['name' => 'TensorFlow',    'cluster' => 'ML/AI',   'proficiency' => 82, 'level' => 'Advanced',  'desc' => 'Deep learning model training & deployment'],
+        ['name' => 'PyTorch',       'cluster' => 'ML/AI',   'proficiency' => 78, 'level' => 'Proficient','desc' => 'Research-grade neural networks & custom training loops'],
+        ['name' => 'Scikit-learn',  'cluster' => 'ML/AI',   'proficiency' => 88, 'level' => 'Advanced',  'desc' => 'Classification, regression, clustering & pipelines'],
+        ['name' => 'OpenCV',        'cluster' => 'ML/AI',   'proficiency' => 75, 'level' => 'Proficient','desc' => 'Computer vision & real-time image processing'],
+        ['name' => 'YOLO',          'cluster' => 'ML/AI',   'proficiency' => 72, 'level' => 'Proficient','desc' => 'Real-time object detection & model fine-tuning'],
         // TOOLS cluster
-        ['name' => 'Git',         'cluster' => 'TOOLS',   'proficiency' => 90, 'level' => 'Expert',    'desc' => 'Version control & collaborative workflow'],
-        ['name' => 'Docker',      'cluster' => 'TOOLS',   'proficiency' => 72, 'level' => 'Proficient','desc' => 'Containerization & deployment'],
-        ['name' => 'MySQL',       'cluster' => 'TOOLS',   'proficiency' => 85, 'level' => 'Advanced',  'desc' => 'Relational DB design & optimization'],
+        ['name' => 'Git',           'cluster' => 'TOOLS',   'proficiency' => 92, 'level' => 'Expert',    'desc' => 'Version control, branching & collaborative workflow'],
+        ['name' => 'MySQL',         'cluster' => 'TOOLS',   'proficiency' => 87, 'level' => 'Advanced',  'desc' => 'Relational DB design, queries & optimization'],
+        ['name' => 'Docker',        'cluster' => 'TOOLS',   'proficiency' => 74, 'level' => 'Proficient','desc' => 'Containerization, compose & deployment pipelines'],
+        ['name' => 'FastAPI',       'cluster' => 'TOOLS',   'proficiency' => 80, 'level' => 'Advanced',  'desc' => 'High-performance async REST API development'],
+        ['name' => 'Flask',         'cluster' => 'TOOLS',   'proficiency' => 83, 'level' => 'Advanced',  'desc' => 'Lightweight web APIs & ML model serving'],
         // ESPORTS cluster
-        ['name' => 'Game Strategy','cluster'=> 'ESPORTS',  'proficiency' => 95, 'level' => 'Expert',    'desc' => 'Meta analysis & competitive gameplay strategy'],
-        ['name' => 'Data Scouting','cluster'=> 'ESPORTS',  'proficiency' => 88, 'level' => 'Advanced',  'desc' => 'Player stats analysis & opponent research'],
+        ['name' => 'LeagueOps',     'cluster' => 'ESPORTS', 'proficiency' => 92, 'level' => 'Expert',    'desc' => 'Tournament operations, scheduling & competitive league management'],
+        ['name' => 'Broadcast',     'cluster' => 'ESPORTS', 'proficiency' => 85, 'level' => 'Advanced',  'desc' => 'Live stream production, overlays & broadcast direction'],
+        ['name' => 'Management',    'cluster' => 'ESPORTS', 'proficiency' => 88, 'level' => 'Advanced',  'desc' => 'Team management, coaching coordination & performance strategy'],
     ];
 }
 
@@ -226,8 +218,8 @@ function get_navigation_items() {
 // ── Social links ──────────────────────────────────────────────────────────────
 function get_social_links() {
     return [
-        ['icon' => 'github',   'url' => SOCIAL_GITHUB,   'title' => 'GitHub'],
-        ['icon' => 'linkedin', 'url' => SOCIAL_LINKEDIN, 'title' => 'LinkedIn'],
-        ['icon' => 'twitter',  'url' => SOCIAL_TWITTER,  'title' => 'Twitter / X'],
+        ['icon' => 'message-circle', 'url' => SOCIAL_DISCORD,  'title' => 'Discord'],
+        ['icon' => 'linkedin',       'url' => SOCIAL_LINKEDIN, 'title' => 'LinkedIn'],
+        ['icon' => 'facebook',       'url' => SOCIAL_FACEBOOK, 'title' => 'Facebook'],
     ];
 }

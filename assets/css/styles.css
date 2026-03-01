@@ -290,7 +290,7 @@ body.cursor-hover #cursor-dot {
     position: fixed;
     inset: 0;
     z-index: var(--z-intro);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     background: var(--bg);
@@ -299,6 +299,7 @@ body.cursor-hover #cursor-dot {
 }
 
 #intro-screen.visible {
+    display: flex;
     opacity: 1;
     pointer-events: all;
 }
@@ -541,11 +542,14 @@ body.cursor-hover #cursor-dot {
 #main-site {
     opacity: 0;
     visibility: hidden;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease 0.1s, visibility 0.8s ease 0.1s, transform 0.8s ease 0.1s;
 }
 
 #main-site.visible {
     opacity: 1;
     visibility: visible;
+    transform: translateY(0);
 }
 
 /* ── 9. SHARED SECTION STYLES ─────────────────────────────────────────────── */
