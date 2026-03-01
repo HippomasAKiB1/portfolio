@@ -39,7 +39,6 @@ function clamp_proficiency($value) {
 function get_page_data() {
     return [
         'hero'         => get_hero_data(),
-        'about'        => get_about_data(),
         'education'    => get_education_data(),
         'skills'       => get_skills_data(),
         'projects'     => get_projects_data(),
