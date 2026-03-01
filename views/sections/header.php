@@ -1,53 +1,37 @@
 <?php
 /**
- * header.php — Sticky navigation bar with dark/light toggle and mobile hamburger
+ * header.php — Glassmorphism sticky nav with HUD labels
  */
 ?>
-<header id="site-header">
-    <!-- Logo -->
-    <a class="logo" href="#hero" data-scroll="hero">
-        <?php echo htmlspecialchars(SITE_NAME); ?>
-    </a>
+<header id="site-header" role="banner">
+    <div class="header-inner">
 
-    <!-- Desktop navigation -->
-    <nav class="nav-desktop" aria-label="Main navigation">
-        <?php foreach ($navigation as $item): ?>
-            <a href="#<?php echo $item['id']; ?>" data-scroll="<?php echo $item['id']; ?>">
-                <?php echo htmlspecialchars($item['label']); ?>
-            </a>
-        <?php endforeach; ?>
-    </nav>
+        <!-- Logo / Name -->
+        <a href="#hero" class="header-logo" id="header-logo" aria-label="<?php echo SITE_NAME; ?> home">
+            <span class="logo-bracket">[</span>
+            <span class="logo-name"><?php echo htmlspecialchars(SITE_NAME); ?></span>
+            <span class="logo-bracket">]</span>
+            <span class="logo-pulse" aria-hidden="true"></span>
+        </a>
 
-    <!-- Header controls: theme toggle + hamburger -->
-    <div class="header-controls">
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle colour theme">
-            <i class="fas fa-moon"></i>
+        <!-- Navigation -->
+        <nav class="header-nav" id="header-nav" role="navigation" aria-label="Main navigation">
+            <div class="nav-indicator" id="nav-indicator" aria-hidden="true"></div>
+            <?php foreach ($navigation as $item): ?>
+                <a href="#<?php echo $item['id']; ?>"
+                   class="nav-link"
+                   data-section="<?php echo $item['id']; ?>"
+                   data-tag="<?php echo htmlspecialchars($item['tag']); ?>">
+                    <span class="nav-tag" aria-hidden="true"><?php echo htmlspecialchars($item['tag']); ?></span>
+                    <span class="nav-label"><?php echo htmlspecialchars($item['label']); ?></span>
+                </a>
+            <?php endforeach; ?>
+        </nav>
+
+        <!-- Mobile menu toggle -->
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+            <span></span><span></span><span></span>
         </button>
 
-        <!-- Hamburger button — shown only on mobile -->
-        <button class="hamburger" id="hamburgerBtn" aria-label="Open menu" aria-expanded="false">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
     </div>
 </header>
-
-<!-- Mobile nav overlay -->
-<div class="mobile-nav" id="mobileNav" aria-hidden="true">
-    <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">
-        <i class="fas fa-times"></i>
-    </button>
-    <nav aria-label="Mobile navigation">
-        <?php foreach ($navigation as $item): ?>
-            <a href="#<?php echo $item['id']; ?>"
-               class="mobile-nav-link"
-               data-scroll="<?php echo $item['id']; ?>">
-                <?php echo htmlspecialchars($item['label']); ?>
-            </a>
-        <?php endforeach; ?>
-    </nav>
-</div>
-
-<!-- Mobile nav backdrop -->
-<div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>

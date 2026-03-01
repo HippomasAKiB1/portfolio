@@ -1,91 +1,100 @@
 <?php
 /**
- * contact.php — Contact section with info cards and AJAX form
+ * contact.php — Cinematic contact section with AJAX form
  */
 ?>
 <section class="contact" id="contact">
     <div class="container">
-        <h2 class="section-title">Get In Touch</h2>
+        <div class="section-head">
+            <span class="section-tag">// SEC.06</span>
+            <h2 class="section-title">OPEN COMMS</h2>
+            <p class="section-sub">Establish a secure channel — I respond within 24h</p>
+        </div>
 
         <div class="contact-layout">
-
-            <!-- Left: contact info cards -->
+            <!-- Left: info panel -->
             <div class="contact-info">
-                <div class="contact-item reveal-item">
-                    <div class="contact-item-icon"><i class="fas fa-envelope"></i></div>
-                    <div>
-                        <h3>Email</h3>
-                        <a href="mailto:<?php echo htmlspecialchars($contact['email']); ?>">
+                <div class="contact-info-header">
+                    <span class="info-label">// TRANSMISSION COORDINATES</span>
+                </div>
+
+                <div class="contact-item">
+                    <div class="contact-item-icon">
+                        <i data-lucide="mail"></i>
+                    </div>
+                    <div class="contact-item-text">
+                        <span class="ci-label">SECURE EMAIL</span>
+                        <a href="mailto:<?php echo htmlspecialchars($contact['email']); ?>" class="ci-value">
                             <?php echo htmlspecialchars($contact['email']); ?>
                         </a>
                     </div>
                 </div>
 
-                <div class="contact-item reveal-item">
-                    <div class="contact-item-icon"><i class="fas fa-phone"></i></div>
-                    <div>
-                        <h3>Phone</h3>
-                        <a href="tel:<?php echo preg_replace('/[^+\d]/', '', $contact['phone']); ?>">
-                            <?php echo htmlspecialchars($contact['phone']); ?>
-                        </a>
+                <div class="contact-item">
+                    <div class="contact-item-icon">
+                        <i data-lucide="map-pin"></i>
+                    </div>
+                    <div class="contact-item-text">
+                        <span class="ci-label">CURRENT BASE</span>
+                        <span class="ci-value"><?php echo htmlspecialchars($contact['location']); ?></span>
                     </div>
                 </div>
 
-                <div class="contact-item reveal-item">
-                    <div class="contact-item-icon"><i class="fas fa-map-marker-alt"></i></div>
-                    <div>
-                        <h3>Location</h3>
-                        <p><?php echo htmlspecialchars($contact['location']); ?></p>
+                <div class="contact-item">
+                    <div class="contact-item-icon">
+                        <i data-lucide="activity"></i>
                     </div>
+                    <div class="contact-item-text">
+                        <span class="ci-label">STATUS</span>
+                        <span class="ci-value status-open">
+                            <span class="ping-dot"></span>
+                            Open to Work
+                        </span>
+                    </div>
+                </div>
+
+                <div class="contact-social">
+                    <?php foreach ($social_links as $link): ?>
+                        <a href="<?php echo htmlspecialchars($link['url']); ?>"
+                           class="contact-social-link"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           aria-label="<?php echo htmlspecialchars($link['title']); ?>">
+                            <i data-lucide="<?php echo $link['icon']; ?>"></i>
+                        </a>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
-            <!-- Right: contact form (submits via AJAX) -->
-            <form class="contact-form reveal-item" id="contactForm" novalidate>
-                <div class="form-group">
-                    <label for="contactName">Your Name</label>
-                    <input type="text"
-                           id="contactName"
-                           name="name"
-                           placeholder="John Doe"
-                           required
-                           autocomplete="name">
-                </div>
-
-                <div class="form-group">
-                    <label for="contactEmail">Your Email</label>
-                    <input type="email"
-                           id="contactEmail"
-                           name="email"
-                           placeholder="john@example.com"
-                           required
-                           autocomplete="email">
-                </div>
-
-                <div class="form-group">
-                    <label for="contactMessage">Message</label>
-                    <textarea id="contactMessage"
-                              name="message"
-                              rows="5"
-                              placeholder="Tell me about your project..."
-                              required></textarea>
-                </div>
-
-                <!-- Submit button with loading state -->
-                <button type="submit" class="btn btn-primary" id="contactSubmit">
-                    <span class="btn-text">Send Message</span>
-                    <span class="btn-loader" hidden><i class="fas fa-spinner fa-spin"></i></span>
-                </button>
-
-                <!-- Success / error message shown by JS -->
-                <div class="form-response" id="formResponse" hidden></div>
-            </form>
-
-        </div><!-- .contact-layout -->
+            <!-- Right: form -->
+            <div class="contact-form-wrap">
+                <form id="contact-form" class="contact-form" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contact-name">// OPERATOR NAME</label>
+                            <input type="text" id="contact-name" name="name" placeholder="Your name" required autocomplete="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-email">// COMM FREQUENCY</label>
+                            <input type="email" id="contact-email" name="email" placeholder="your@email.com" required autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-subject">// SUBJECT LINE</label>
+                        <input type="text" id="contact-subject" name="subject" placeholder="Mission objective" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-message">// MESSAGE BODY</label>
+                        <textarea id="contact-message" name="message" rows="5" placeholder="Your transmission..." required></textarea>
+                    </div>
+                    <button type="submit" class="form-submit" id="form-submit">
+                        <i data-lucide="send"></i>
+                        <span>TRANSMIT MESSAGE</span>
+                        <div class="submit-glow" aria-hidden="true"></div>
+                    </button>
+                    <div id="form-status" class="form-status" role="alert" aria-live="polite"></div>
+                </form>
+            </div>
+        </div>
     </div>
 </section>
-
-<!-- AJAX endpoint URL for JS -->
-<script>
-    var ajaxContactUrl = '<?php echo BASE_URL; ?>ajax_contact.php';
-</script>

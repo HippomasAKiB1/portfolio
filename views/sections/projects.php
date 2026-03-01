@@ -1,51 +1,76 @@
 <?php
 /**
- * projects.php — Featured project cards with 3D tilt (handled by JS)
+ * projects.php — "CASE FILES" — Classified folder grid with dossier overlay
  */
+$projects_json = json_encode($projects);
+$categories = array_unique(array_column($projects, 'category'));
 ?>
 <section class="projects" id="projects">
     <div class="container">
-        <h2 class="section-title">Featured Projects</h2>
+        <div class="section-head">
+            <span class="section-tag">// SEC.04</span>
+            <h2 class="section-title">CASE FILES</h2>
+            <p class="section-sub">Classified mission dossiers — select for full briefing</p>
+        </div>
 
-        <div class="projects-grid">
+        <!-- Filter bar -->
+        <div class="projects-filter" role="group" aria-label="Filter projects">
+            <button class="filter-btn active" data-filter="ALL">ALL FILES</button>
+            <?php foreach ($categories as $cat): ?>
+                <button class="filter-btn" data-filter="<?php echo htmlspecialchars($cat); ?>">
+                    <?php echo htmlspecialchars($cat); ?>
+                </button>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Project grid -->
+        <div class="projects-grid" id="projects-grid">
             <?php foreach ($projects as $project): ?>
-                <div class="project-card reveal-item">
+                <article class="project-card reveal-card"
+                         data-id="<?php echo htmlspecialchars($project['id']); ?>"
+                         data-category="<?php echo htmlspecialchars($project['category']); ?>">
 
-                    <!-- Project thumbnail / emoji -->
-                    <div class="project-image">
-                        <span class="project-emoji"><?php echo $project['emoji']; ?></span>
+                    <!-- Card top bar -->
+                    <div class="card-topbar">
+                        <span class="card-clearance clearance-<?php echo strtolower($project['clearance']); ?>">
+                            <?php echo htmlspecialchars($project['clearance']); ?>
+                        </span>
+                        <span class="card-status status-<?php echo strtolower(str_replace('_', '-', $project['status'])); ?>">
+                            <?php echo str_replace('_', ' ', $project['status']); ?>
+                        </span>
                     </div>
 
-                    <div class="project-content">
-                        <h3><?php echo htmlspecialchars($project['title']); ?></h3>
-                        <p><?php echo htmlspecialchars($project['description']); ?></p>
+                    <!-- Card emoji / icon -->
+                    <div class="card-icon" aria-hidden="true"><?php echo $project['emoji']; ?></div>
 
-                        <!-- Tech-stack tags -->
-                        <div class="project-tags">
+                    <!-- Card body -->
+                    <div class="card-body">
+                        <span class="card-id"><?php echo htmlspecialchars($project['id']); ?></span>
+                        <h3 class="card-title"><?php echo htmlspecialchars($project['title']); ?></h3>
+                        <p class="card-desc"><?php echo htmlspecialchars($project['description']); ?></p>
+
+                        <div class="card-tags">
                             <?php foreach ($project['tags'] as $tag): ?>
-                                <span class="tag"><?php echo htmlspecialchars($tag); ?></span>
+                                <span class="card-tag"><?php echo htmlspecialchars($tag); ?></span>
                             <?php endforeach; ?>
                         </div>
-
-                        <!-- Links -->
-                        <div class="project-links">
-                            <a href="<?php echo htmlspecialchars($project['demo_url']); ?>"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               class="project-link">
-                                <i class="fas fa-external-link-alt"></i> Live Demo
-                            </a>
-                            <a href="<?php echo htmlspecialchars($project['code_url']); ?>"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               class="project-link">
-                                <i class="fab fa-github"></i> Source Code
-                            </a>
-                        </div>
                     </div>
 
-                </div>
+                    <!-- Open dossier prompt -->
+                    <div class="card-footer">
+                        <span class="card-open-prompt">
+                            <i data-lucide="file-text"></i>
+                            OPEN DOSSIER
+                        </span>
+                    </div>
+
+                    <!-- Hover shimmer -->
+                    <div class="card-shimmer" aria-hidden="true"></div>
+                </article>
             <?php endforeach; ?>
         </div>
     </div>
+
+    <!-- Dossier data for JS -->
+    <script>var PROJECTS_DATA = <?php echo $projects_json; ?>;</script>
 </section>

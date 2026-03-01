@@ -1,17 +1,21 @@
 <?php
 /**
- * intro.php — Full-screen splash page shown after the loading screen
+ * intro.php — Cinematic splash / welcome screen
  */
 ?>
-<div id="intro-page" aria-hidden="true">
-    <!-- Interactive canvas particle animation (driven by JS) -->
-    <canvas class="intro-canvas" id="introCanvas"></canvas>
-
+<div id="intro-screen" aria-label="Welcome">
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
     <div class="intro-content">
-        <h1 class="intro-title"><?php echo htmlspecialchars($hero['name']); ?></h1>
-        <p class="intro-subtitle"><?php echo htmlspecialchars($hero['typed_strings'][0]); ?></p>
-        <button class="explore-btn" id="exploreBtn">
-            Explore <i class="fas fa-arrow-right"></i>
+        <p class="intro-label">PORTFOLIO // ONLINE</p>
+        <h1 class="intro-title">
+            <span class="intro-name"><?php echo htmlspecialchars(SITE_NAME); ?></span>
+        </h1>
+        <p class="intro-subtitle">Problem Solver &amp; Digital Architect</p>
+        <button id="enter-btn" aria-label="Enter portfolio">
+            <span class="enter-bracket">[</span>
+            <span class="enter-text">ENTER</span>
+            <span class="enter-bracket">]</span>
         </button>
     </div>
+    <div class="intro-scan" aria-hidden="true"></div>
 </div>
