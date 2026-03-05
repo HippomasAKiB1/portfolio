@@ -136,7 +136,8 @@ function initIntroParticles() {
     window.addEventListener('resize', resize);
 
     // Particles = drifting data-stream dots
-    const PARTICLE_COUNT = 120;
+    const isMobile = window.innerWidth < 768;
+    const PARTICLE_COUNT = isMobile ? 30 : 120;
     const particles = Array.from({ length: PARTICLE_COUNT }, () => ({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
@@ -238,7 +239,8 @@ function revealMain() {
    ════════════════════════════════════════════════════════════════════════════ */
 function initLenis() {
     if (typeof Lenis === 'undefined') return;
-    const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
+    const isMobile = window.innerWidth < 768;
+    const lenis = new Lenis({ lerp: isMobile ? 0.1 : 0.08, smoothWheel: !isMobile });
 
     // Use GSAP ticker exclusively to drive Lenis (avoids double-stepping per frame)
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
@@ -268,8 +270,9 @@ function initHeroThree() {
     const canvas = document.getElementById('hero-canvas');
     if (!canvas || typeof THREE === 'undefined') return;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const isMobile = window.innerWidth < 768;
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isMobile, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1 : 2));
     renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
     renderer.setClearColor(0x000000, 0);
 
@@ -289,7 +292,7 @@ function initHeroThree() {
     scene.add(mesh);
 
     // Floating particles
-    const ptCount = 200;
+    const ptCount = isMobile ? 50 : 200;
     const positions = new Float32Array(ptCount * 3);
     for (let i = 0; i < ptCount * 3; i++) positions[i] = (Math.random() - 0.5) * 12;
     const ptGeo = new THREE.BufferGeometry();
