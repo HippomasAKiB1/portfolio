@@ -22,7 +22,7 @@ function get_hero_data() {
             ['label' => 'STATUS',    'value' => 'Open to Work'],
             ['label' => 'SPECIALTY', 'value' => 'Problem Solving'],
             ['label' => 'BASE',      'value' => 'Dhaka, BD'],
-            ['label' => 'XP',        'value' => '3+ Years'],
+            ['label' => 'XP',        'value' => '2+ Years'],
         ],
     ];
 }
